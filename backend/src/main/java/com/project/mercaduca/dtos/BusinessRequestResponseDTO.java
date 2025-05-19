@@ -19,6 +19,7 @@ public class BusinessRequestResponseDTO {
     private String priceRange;
     private String socialMedia;
     private String phone;
+    private String urlLogo;
 
     private String userName;
     private String userLastName;

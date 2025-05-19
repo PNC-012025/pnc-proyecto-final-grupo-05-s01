@@ -29,6 +29,7 @@ public class BusinessRequest {
     private String priceRange;
     private String socialMedia;
     private String phone;
+    private String urlLogo;
 
     // Datos del solicitante
     private String userName;

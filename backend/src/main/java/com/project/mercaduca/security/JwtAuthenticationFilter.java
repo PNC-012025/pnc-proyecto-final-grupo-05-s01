@@ -32,12 +32,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
+        String method = request.getMethod();
 
-        if (path.equals("/api/auth/login") || path.equals("/api/auth/logout")) {
+        // Rutas públicas que no deben pasar por validación JWT
+        boolean isPublicPath =
+                (method.equals("POST") && path.equals("/api/auth/login")) ||
+                        (method.equals("POST") && path.equals("/api/auth/logout")) ||
+                        (method.equals("POST") && path.equals("/api/business-requests")) ||
+                        (method.equals("GET") && path.equals("/api/business-requests")) ||
+                        (method.equals("POST") && path.matches("/api/business-requests/\\d+/approve")) ||
+                        (method.equals("GET") && path.equals("/api/products/"));
+
+        if (isPublicPath) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Intentar recuperar el token de la cookie
         String token = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -63,5 +74,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+
+
 
 }
