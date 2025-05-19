@@ -31,6 +31,9 @@ public class BusinessRequestCreateDTO {
     @NotNull(message = "Telefono obligatorio")
     private String phone;
 
+    @NotNull(message = "Logo obligatorio")
+    private String urlLogo;
+
     @NotNull(message = "Nombre de usuario obligatorio")
     private String userName;
 

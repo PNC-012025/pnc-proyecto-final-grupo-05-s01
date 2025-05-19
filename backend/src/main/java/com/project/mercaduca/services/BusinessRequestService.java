@@ -1,6 +1,7 @@
 package com.project.mercaduca.services;
 
 import com.project.mercaduca.dtos.BusinessRequestCreateDTO;
+import com.project.mercaduca.dtos.BusinessSummaryDTO;
 import com.project.mercaduca.models.BusinessRequest;
 import com.project.mercaduca.models.User;
 import com.project.mercaduca.repositories.BusinessRequestRepository;
@@ -42,6 +43,7 @@ public class BusinessRequestService {
     public BusinessRequest createBusinessRequest(BusinessRequestCreateDTO dto) {
         BusinessRequest request = new BusinessRequest();
 
+        request.setUrlLogo(dto.getUrlLogo());
         request.setBusinessName(dto.getBusinessName());
         request.setDescription(dto.getDescription());
         request.setSector(dto.getSector());
@@ -70,6 +72,41 @@ public class BusinessRequestService {
         return businessRequestRepository.findAll();
     }
 
+    /*public void approveRequest(Long requestId) {
+        BusinessRequest request = businessRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        if (!"PENDIENTE".equalsIgnoreCase(request.getStatus())) {
+            throw new IllegalStateException("Esta solicitud ya fue procesada");
+        }
+
+        String tempPassword = UUID.randomUUID().toString().substring(0, 8);
+        String encodedPassword = passwordEncoder.encode(tempPassword);
+
+        User user = new User();
+        user.setName(request.getUserName());
+        user.setLastName(request.getUserLastName());
+        user.setMail(request.getUserEmail());
+        user.setGender(request.getUserGender());
+        user.setBirthDate(request.getUserBirthDate());
+        user.setFaculty(request.getUserFaculty());
+        user.setMajor(request.getUserMajor());
+        user.setPassword(encodedPassword);
+        user.setRole(roleRepository.findByName("ROLE_EMPRENDEDOR").orElseThrow());
+
+        userRepository.save(user);
+
+        request.setStatus("APROBADO");
+        request.setReviewDate(LocalDate.now());
+        businessRequestRepository.save(request);
+
+        emailService.send(
+                user.getMail(),
+                "Tu cuenta en Mercaduca fue aprobada 🎉",
+                "Bienvenido a Mercaduca. Tu usuario es: " + user.getMail() +
+                        " y tu contraseña temporal es: " + tempPassword
+        );
+    }*/
     public void approveRequest(Long requestId) {
         BusinessRequest request = businessRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -90,7 +127,7 @@ public class BusinessRequestService {
         user.setFaculty(request.getUserFaculty());
         user.setMajor(request.getUserMajor());
         user.setPassword(encodedPassword);
-        user.setRole(roleRepository.findByName("ROLE_STUDENT").orElseThrow());
+        user.setRole(roleRepository.findByName("ROLE_EMPRENDEDOR").orElseThrow());
 
         userRepository.save(user);
 
@@ -98,15 +135,26 @@ public class BusinessRequestService {
         request.setReviewDate(LocalDate.now());
         businessRequestRepository.save(request);
 
-        emailService.send(
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<h2>Bienvenido a Mercaduca 🎉</h2>" +
+                "<p>Tu usuario es: <strong>" + user.getMail() + "</strong></p>" +
+                "<p>Tu contraseña temporal es: <strong>" + tempPassword + "</strong></p>" +
+                "<p>Por favor, cambia tu contraseña después de iniciar sesión.</p>" +
+                "<br>" +
+                "<p>Saludos,<br>El equipo de Mercaduca</p>" +
+                "</body>" +
+                "</html>";
+
+        emailService.sendHtml(
                 user.getMail(),
                 "Tu cuenta en Mercaduca fue aprobada 🎉",
-                "Bienvenido a Mercaduca. Tu usuario es: " + user.getMail() +
-                        " y tu contraseña temporal es: " + tempPassword
+                htmlMessage
         );
     }
 
-    public void rejectRequest(Long requestId, String reason) {
+
+    /*public void rejectRequest(Long requestId, String reason) {
         BusinessRequest request = businessRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
@@ -124,6 +172,40 @@ public class BusinessRequestService {
                 "Tu solicitud a Mercaduca fue rechazada 😢",
                 "Lamentamos informarte que tu solicitud ha sido rechazada. Motivo: " + reason
         );
+    }*/
+    public void rejectRequest(Long requestId, String reason) {
+        BusinessRequest request = businessRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        if (!"PENDIENTE".equalsIgnoreCase(request.getStatus())) {
+            throw new IllegalStateException("Esta solicitud ya fue procesada");
+        }
+
+        request.setStatus("RECHAZADO");
+        request.setReviewDate(LocalDate.now());
+
+        businessRequestRepository.save(request);
+
+        String htmlRejection = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<h2>Solicitud Rechazada 😢</h2>" +
+                "<p>Lamentamos informarte que tu solicitud ha sido <strong>rechazada</strong>.</p>" +
+                "<p>Motivo: <em>" + reason + "</em></p>" +
+                "<br>" +
+                "<p>Si tienes dudas, contáctanos.</p>" +
+                "<p>Saludos,<br>El equipo de Mercaduca</p>" +
+                "</body>" +
+                "</html>";
+
+        emailService.sendHtml(
+                request.getUserEmail(),
+                "Tu solicitud a Mercaduca fue rechazada 😢",
+                htmlRejection
+        );
+    }
+
+    public List<BusinessSummaryDTO> getApprovedBusinessSummaries() {
+        return businessRequestRepository.findApprovedBusinessSummaries();
     }
 
 

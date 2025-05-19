@@ -2,9 +2,11 @@ package com.project.mercaduca.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter @Setter
 public class ProductCreateDTO {
 
@@ -17,11 +19,11 @@ public class ProductCreateDTO {
     @NotNull(message = "El stock es obligatorio")
     private Integer stock;
 
-    private String urlImage; // opcional
-
-    @NotNull(message = "Debe asociarse a un usuario")
-    private Long userId;
+    private String urlImage;
 
     @NotNull(message = "Debe asociarse a una categoría")
     private Long categoryId;
+
+    @NotNull(message = "El precio es obligatorio")
+    private Double price;
 }
