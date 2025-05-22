@@ -7,6 +7,7 @@ import com.project.mercaduca.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,7 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    /*
     @PostMapping
     @PreAuthorize("hasRole('EMPRENDEDOR')")
     public ResponseEntity<?> createProduct(
@@ -29,18 +31,48 @@ public class ProductController {
             @RequestParam("stock") int stock,
             @RequestParam("categoryId") Long categoryId,
             @RequestParam("price") Double price,
-            @RequestParam("userId") Long userId
+            @RequestParam("businessId") Long businessId
     ) {
         try {
             String imageUrl = cloudinaryService.uploadImage(image);
 
             ProductCreateDTO dto = new ProductCreateDTO(name, description, stock, imageUrl, categoryId, price);
 
-            productService.createProduct(dto, userId);
+            productService.createProduct(dto, businessId);
 
             return ResponseEntity.ok("Producto enviado para aprobación.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al crear producto: " + e.getMessage());
+        }
+    }*/
+    @PostMapping
+    @PreAuthorize("hasRole('EMPRENDEDOR')")
+    public ResponseEntity<?> createProduct(
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("stock") int stock,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("price") Double price
+    ) {
+        try {
+            String imageUrl = cloudinaryService.uploadImage(image);
+            ProductCreateDTO dto = new ProductCreateDTO(name, description, stock, imageUrl, categoryId, price);
+
+            productService.createProduct(dto);
+
+            return ResponseEntity.ok("Producto enviado para aprobación.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al crear producto: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/business/{businessId}/approved")
+    public ResponseEntity<?> getBusinessWithApprovedProducts(@PathVariable Long businessId) {
+        try {
+            return ResponseEntity.ok(productService.getBusinessWithApprovedProducts(businessId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
@@ -69,10 +101,10 @@ public class ProductController {
         return ResponseEntity.ok(productService.getPendingProducts());
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/business/{businessId}")
     @PreAuthorize("hasRole('EMPRENDEDOR')")
-    public ResponseEntity<?> getProductsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(productService.getProductsByUser(userId));
+    public ResponseEntity<?> getProductsByBusiness(@PathVariable Long businessId) {
+        return ResponseEntity.ok(productService.getProductsByBusiness(businessId));
     }
 
 

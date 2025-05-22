@@ -32,6 +32,9 @@ public class User implements UserDetails {
     private String faculty;
     private String major;
 
+    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+    private Business business;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

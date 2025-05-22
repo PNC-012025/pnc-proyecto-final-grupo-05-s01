@@ -1,20 +1,38 @@
 package com.project.mercaduca.services;
 
+import com.project.mercaduca.dtos.BusinessWithProductsDTO;
 import com.project.mercaduca.dtos.ProductCreateDTO;
+import com.project.mercaduca.dtos.ProductPriceResponseDTO;
+import com.project.mercaduca.dtos.ProductResponseDTO;
 import com.project.mercaduca.models.*;
 import com.project.mercaduca.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
+    public Double roundPrice(Double price) {
+        if (price == null) return null;
+        return BigDecimal.valueOf(price)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private BusinessRepository businessRepository;
 
     @Autowired
     private ProductPriceRepository productPriceRepository;
@@ -28,9 +46,13 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public void createProduct(ProductCreateDTO dto, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow();
-        Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow();
+    /*
+    public void createProduct(ProductCreateDTO dto, Long businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Business no encontrado"));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
         Product product = new Product();
         product.setName(dto.getName());
@@ -38,12 +60,44 @@ public class ProductService {
         product.setStock(dto.getStock());
         product.setUrlImage(dto.getUrlImage());
         product.setStatus("PENDIENTE");
-        product.setUser(user);
+        product.setBusiness(business);
         product.setCategory(category);
         product = productRepository.save(product);
 
         ProductPrice price = new ProductPrice();
-        price.setPrice(dto.getPrice());
+        price.setPrice(roundPrice(dto.getPrice()));
+        price.setStartDate(LocalDate.now());
+        price.setProduct(product);
+        productPriceRepository.save(price);
+
+        ProductApproval approval = new ProductApproval();
+        approval.setStatus("PENDIENTE");
+        approval.setReviewDate(null);
+        approval.setRemarks(null);
+        approval.setProduct(product);
+        productApprovalRepository.save(approval);
+    }*/
+    public void createProduct(ProductCreateDTO dto) {
+        User user = authService.getAuthenticatedUser();
+
+        Business business = businessRepository.findByOwner(user)
+                .orElseThrow(() -> new RuntimeException("El usuario no tiene un negocio asociado"));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+
+        Product product = new Product();
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setStock(dto.getStock());
+        product.setUrlImage(dto.getUrlImage());
+        product.setStatus("PENDIENTE");
+        product.setBusiness(business);
+        product.setCategory(category);
+        product = productRepository.save(product);
+
+        ProductPrice price = new ProductPrice();
+        price.setPrice(roundPrice(dto.getPrice()));
         price.setStartDate(LocalDate.now());
         price.setProduct(product);
         productPriceRepository.save(price);
@@ -55,6 +109,7 @@ public class ProductService {
         approval.setProduct(product);
         productApprovalRepository.save(approval);
     }
+
 
     @Transactional
     public void reviewProduct(Long productId, boolean aprobado, String remarks) {
@@ -71,17 +126,114 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    public List<Product> getApprovedProducts() {
-        return productRepository.findByStatus("APROBADO");
+    public List<ProductResponseDTO> getApprovedProducts() {
+        List<Product> products = productRepository.findByStatus("APROBADO");
+
+        return products.stream()
+                .map(product -> new ProductResponseDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getStock(),
+                        product.getStatus(),
+                        product.getUrlImage(),
+                        product.getBusiness().getOwner().getName(),
+                        product.getCategory().getName(),
+                        getCurrentPriceDTO(product.getId())
+                ))
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getPendingProducts() {
-        return productRepository.findByStatus("PENDIENTE");
+
+    public List<ProductResponseDTO> getPendingProducts() {
+        List<Product> products = productRepository.findByStatus("PENDIENTE");
+
+        return products.stream()
+                .map(product -> new ProductResponseDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getStock(),
+                        product.getStatus(),
+                        product.getUrlImage(),
+                        product.getBusiness().getOwner().getName(),
+                        product.getCategory().getName(),
+                        getCurrentPriceDTO(product.getId())
+                ))
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getProductsByUser(Long userId) {
+
+    /*public List<Product> getProductsByUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         return productRepository.findByUser(user);
+    }*/
+
+    public List<ProductResponseDTO> getProductsByBusiness(Long businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Negocio no encontrado"));
+
+        return productRepository.findByBusiness(business).stream()
+                .map(product -> new ProductResponseDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getStock(),
+                        product.getStatus(),
+                        product.getUrlImage(),
+                        product.getBusiness().getOwner().getName(),
+                        product.getCategory().getName(),
+                        getCurrentPriceDTO(product.getId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public BusinessWithProductsDTO getBusinessWithApprovedProducts(Long businessId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new RuntimeException("Negocio no encontrado"));
+
+        List<Product> approvedProducts = productRepository.findByBusinessAndStatus(business, "APROBADO");
+
+        List<ProductResponseDTO> productDTOs = approvedProducts.stream()
+                .map(product -> new ProductResponseDTO(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getStock(),
+                        product.getStatus(),
+                        product.getUrlImage(),
+                        product.getBusiness().getOwner().getName(),
+                        product.getCategory().getName(),
+                        getCurrentPriceDTO(product.getId())
+                ))
+                .collect(Collectors.toList());
+
+        return new BusinessWithProductsDTO(
+                business.getId(),
+                business.getBusinessName(),
+                business.getDescription(),
+                business.getSector(),
+                business.getProductType(),
+                business.getPriceRange(),
+                business.getSocialMedia(),
+                business.getPhone(),
+                business.getUrlLogo(),
+                productDTOs
+        );
+    }
+
+    private ProductPriceResponseDTO getCurrentPriceDTO(Long productId) {
+        return productPriceRepository.findTopByProductIdAndEndDateIsNullOrderByStartDateDesc(productId)
+                .map(price -> {
+                    ProductPriceResponseDTO dto = new ProductPriceResponseDTO();
+                    dto.setId(price.getId());
+                    dto.setPrice(price.getPrice());
+                    dto.setStartDate(price.getStartDate());
+                    dto.setEndDate(price.getEndDate());
+                    dto.setProductId(productId);
+                    return dto;
+                })
+                .orElse(null);
     }
 
 
