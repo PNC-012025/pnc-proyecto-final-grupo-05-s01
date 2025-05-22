@@ -58,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/pending").hasRole("ADMIN")
                         //.requestMatchers(HttpMethod.GET, "/api/products/*").hasRole("EMPRENDEDOR")
                         .requestMatchers(HttpMethod.GET, "/api/products/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/business/*/approved").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/business-requests/approved-summary").permitAll()
 
                         .anyRequest().authenticated()
                 )

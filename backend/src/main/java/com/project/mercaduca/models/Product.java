@@ -24,8 +24,8 @@ public class Product {
     private String urlImage;
 
     @ManyToOne
-    @JoinColumn(name = "users_id")
-    private User user;
+    @JoinColumn(name = "business_id")
+    private Business business;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
