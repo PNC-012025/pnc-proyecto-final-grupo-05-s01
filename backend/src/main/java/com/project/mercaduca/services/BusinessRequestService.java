@@ -52,7 +52,8 @@ public class BusinessRequestService {
         request.setSector(dto.getSector());
         request.setProductType(dto.getProductType());
         request.setPriceRange(dto.getPriceRange());
-        request.setSocialMedia(dto.getSocialMedia());
+        request.setFacebook(dto.getFacebook());
+        request.setInstagram(dto.getInstagram());
         request.setPhone(dto.getPhone());
 
         request.setUserName(dto.getUserName());
@@ -108,7 +109,8 @@ public class BusinessRequestService {
         business.setSector(request.getSector());
         business.setProductType(request.getProductType());
         business.setPriceRange(request.getPriceRange());
-        business.setSocialMedia(request.getSocialMedia());
+        business.setFacebook(request.getFacebook());
+        business.setInstagram(request.getInstagram());
         business.setPhone(request.getPhone());
         business.setUrlLogo(request.getUrlLogo());
         business.setOwner(user);

@@ -1,5 +1,6 @@
 package com.project.mercaduca.controllers;
 
+import com.project.mercaduca.dtos.BusinessRequestDTO;
 import com.project.mercaduca.dtos.BusinessUpdateDTO;
 import com.project.mercaduca.services.BusinessService;
 import com.project.mercaduca.services.CloudinaryService;
@@ -25,7 +26,8 @@ public class BusinessController {
             @RequestParam("sector") String sector,
             @RequestParam("productType") String productType,
             @RequestParam("priceRange") String priceRange,
-            @RequestParam("socialMedia") String socialMedia,
+            @RequestParam("facebook") String facebook,
+            @RequestParam("instagram") String instagram,
             @RequestParam("phone") String phone,
             @RequestPart(value = "logo", required = false) MultipartFile logo
     ) {
@@ -41,7 +43,8 @@ public class BusinessController {
             dto.setSector(sector);
             dto.setProductType(productType);
             dto.setPriceRange(priceRange);
-            dto.setSocialMedia(socialMedia);
+            dto.setFacebook(facebook);
+            dto.setInstagram(instagram);
             dto.setPhone(phone);
             dto.setUrlLogo(logoUrl);
 
@@ -51,5 +54,10 @@ public class BusinessController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al actualizar negocio: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<BusinessRequestDTO> getMyBusiness() {
+        return ResponseEntity.ok(businessService.getBusinessOfAuthenticatedUser());
     }
 }

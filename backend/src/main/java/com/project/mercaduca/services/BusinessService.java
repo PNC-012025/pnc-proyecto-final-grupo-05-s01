@@ -1,5 +1,6 @@
 package com.project.mercaduca.services;
 
+import com.project.mercaduca.dtos.BusinessRequestDTO;
 import com.project.mercaduca.dtos.BusinessUpdateDTO;
 import com.project.mercaduca.models.Business;
 import com.project.mercaduca.models.User;
@@ -28,7 +29,8 @@ public class BusinessService {
         business.setSector(dto.getSector());
         business.setProductType(dto.getProductType());
         business.setPriceRange(dto.getPriceRange());
-        business.setSocialMedia(dto.getSocialMedia());
+        business.setFacebook(dto.getFacebook());
+        business.setInstagram(dto.getInstagram());
         business.setPhone(dto.getPhone());
 
         if (dto.getUrlLogo() != null) {
@@ -37,4 +39,25 @@ public class BusinessService {
 
         businessRepository.save(business);
     }
+
+    public BusinessRequestDTO getBusinessOfAuthenticatedUser() {
+        User currentUser = authService.getAuthenticatedUser();
+        Business business = businessRepository.findByOwner(currentUser)
+                .orElseThrow(() -> new RuntimeException("No se encontró negocio del usuario"));
+
+        BusinessRequestDTO dto = new BusinessRequestDTO();
+        dto.setId(business.getId());
+        dto.setBusinessName(business.getBusinessName());
+        dto.setDescription(business.getDescription());
+        dto.setSector(business.getSector());
+        dto.setProductType(business.getProductType());
+        dto.setPriceRange(business.getPriceRange());
+        dto.setFacebook(business.getFacebook());
+        dto.setInstagram(business.getInstagram());
+        dto.setPhone(business.getPhone());
+        dto.setUrlLogo(business.getUrlLogo());
+
+        return dto;
+    }
+
 }

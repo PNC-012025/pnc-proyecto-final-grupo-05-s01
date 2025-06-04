@@ -237,7 +237,8 @@ public class ProductService {
                 business.getSector(),
                 business.getProductType(),
                 business.getPriceRange(),
-                business.getSocialMedia(),
+                business.getFacebook(),
+                business.getInstagram(),
                 business.getPhone(),
                 business.getUrlLogo(),
                 productDTOs

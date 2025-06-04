@@ -40,7 +40,8 @@ public class BusinessRequestController {
             @RequestParam("sector") String sector,
             @RequestParam("productType") String productType,
             @RequestParam("priceRange") String priceRange,
-            @RequestParam("socialMedia") String socialMedia,
+            @RequestParam("facebook") String facebook,
+            @RequestParam("instagram") String instagram,
             @RequestParam("phone") String phone,
             @RequestParam("userName") String userName,
             @RequestParam("userLastName") String userLastName,
@@ -59,7 +60,8 @@ public class BusinessRequestController {
             dto.setSector(sector);
             dto.setProductType(productType);
             dto.setPriceRange(priceRange);
-            dto.setSocialMedia(socialMedia);
+            dto.setFacebook(facebook);
+            dto.setInstagram(instagram);
             dto.setPhone(phone);
             dto.setUrlLogo(logoUrl);
             dto.setUserName(userName);
@@ -93,7 +95,8 @@ public class BusinessRequestController {
             dto.setSector(req.getSector());
             dto.setProductType(req.getProductType());
             dto.setPriceRange(req.getPriceRange());
-            dto.setSocialMedia(req.getSocialMedia());
+            dto.setFacebook(req.getFacebook());
+            dto.setInstagram(req.getInstagram());
             dto.setPhone(req.getPhone());
             dto.setUserName(req.getUserName());
             dto.setUserLastName(req.getUserLastName());

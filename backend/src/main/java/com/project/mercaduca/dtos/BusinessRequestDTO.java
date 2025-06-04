@@ -1,15 +1,12 @@
 package com.project.mercaduca.dtos;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.time.LocalDate;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class BusinessWithProductsDTO {
+@Getter @Setter
+public class BusinessRequestDTO {
     private Long id;
     private String businessName;
     private String description;
@@ -20,5 +17,4 @@ public class BusinessWithProductsDTO {
     private String instagram;
     private String phone;
     private String urlLogo;
-    private List<ProductResponseDTO> approvedProducts;
 }
