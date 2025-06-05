@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -133,14 +135,23 @@ public class ProductController {
     @PostMapping("/approve-batch")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> approveProductsBatch(@RequestBody ProductApprovalRequestDTO request) {
-        List<Product> approvedProducts = productRepository.findAllById(request.getApprovedProductIds());
-        List<Product> rejectedProducts = productRepository.findAllById(request.getRejectedProductIds());
+        Set<Long> approvedIds = new HashSet<>(request.getApprovedProductIds());
+        Set<Long> rejectedIds = new HashSet<>(request.getRejectedProductIds());
+
+        Set<Long> intersection = new HashSet<>(approvedIds);
+        intersection.retainAll(rejectedIds);
+
+        if (!intersection.isEmpty()) {
+            return ResponseEntity.badRequest().body("Un producto no puede ser aprobado y rechazado al mismo tiempo. IDs conflictivos: " + intersection);
+        }
+
+        List<Product> approvedProducts = productRepository.findAllById(approvedIds);
+        List<Product> rejectedProducts = productRepository.findAllById(rejectedIds);
 
         LocalDate now = LocalDate.now();
 
         for (Product product : approvedProducts) {
             product.setStatus("APROBADO");
-
             ProductApproval approval = productApprovalRepository.findByProduct(product)
                     .orElse(new ProductApproval());
             approval.setProduct(product);
@@ -152,7 +163,6 @@ public class ProductController {
 
         for (Product product : rejectedProducts) {
             product.setStatus("RECHAZADO");
-
             ProductApproval approval = productApprovalRepository.findByProduct(product)
                     .orElse(new ProductApproval());
             approval.setProduct(product);
@@ -165,13 +175,18 @@ public class ProductController {
         productRepository.saveAll(approvedProducts);
         productRepository.saveAll(rejectedProducts);
 
-        Optional<User> optionalUser = userRepository.findById(request.getUserId());
-        optionalUser.ifPresent(user -> {
+
+        if (!approvedProducts.isEmpty()) {
+            User user = approvedProducts.get(0).getBusiness().getOwner();
             emailService.sendProductApprovalSummaryEmail(user, approvedProducts, rejectedProducts, request.getRemark());
-        });
+        } else if (!rejectedProducts.isEmpty()) {
+            User user = rejectedProducts.get(0).getBusiness().getOwner();
+            emailService.sendProductApprovalSummaryEmail(user, approvedProducts, rejectedProducts, request.getRemark());
+        }
 
         return ResponseEntity.ok("Productos procesados correctamente.");
     }
+
 
 
 

@@ -44,6 +44,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/business-requests").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/business-requests/*/approve").permitAll()
@@ -60,7 +61,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/business/*/approved").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/business-requests/approved-summary").permitAll()
-
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

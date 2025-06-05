@@ -21,6 +21,9 @@ public class Contract {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
+    private Boolean renewalRequested = false;
+    private LocalDate nextPaymentDate;
+    private String paymentFrequency;
 
     @ManyToOne
     @JoinColumn(name = "users_id")

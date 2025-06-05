@@ -4,6 +4,7 @@ import com.project.mercaduca.dtos.BusinessWithProductsDTO;
 import com.project.mercaduca.dtos.ProductCreateDTO;
 import com.project.mercaduca.dtos.ProductPriceResponseDTO;
 import com.project.mercaduca.dtos.ProductResponseDTO;
+import com.project.mercaduca.exceptions.MaxProductsReachedException;
 import com.project.mercaduca.models.*;
 import com.project.mercaduca.repositories.*;
 import jakarta.transaction.Transactional;
@@ -86,6 +87,11 @@ public class ProductService {
         Business business = businessRepository.findByOwner(user)
                 .orElseThrow(() -> new RuntimeException("El usuario no tiene un negocio asociado"));
 
+        long productCount = productRepository.countByBusiness(business);
+        if (productCount >= 7) {
+            throw new MaxProductsReachedException("No se pueden crear más de 7 productos por usuario");
+        }
+
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
@@ -112,6 +118,7 @@ public class ProductService {
         approval.setProduct(product);
         productApprovalRepository.save(approval);
     }
+
 
 
     @Transactional
@@ -168,7 +175,8 @@ public class ProductService {
 
 
     public List<ProductResponseDTO> getPendingProducts(Long businessId) {
-        List<Product> products = productRepository.findByStatusAndBusinessId("PENDIENTE", businessId);
+        List<String> statuses = List.of("PENDIENTE", "RECHAZADO");
+        List<Product> products = productRepository.findByStatusInAndBusinessId(statuses, businessId);
 
         return products.stream()
                 .map(product -> new ProductResponseDTO(

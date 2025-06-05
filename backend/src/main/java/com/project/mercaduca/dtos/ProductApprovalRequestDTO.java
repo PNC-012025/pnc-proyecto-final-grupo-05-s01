@@ -9,5 +9,4 @@ public class ProductApprovalRequestDTO {
     private List<Long> approvedProductIds;
     private List<Long> rejectedProductIds;
     private String remark;
-    private Long userId;
 }
