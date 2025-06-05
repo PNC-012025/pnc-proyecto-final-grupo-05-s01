@@ -38,4 +38,7 @@ public class UserCreateDTO {
 
     @NotNull(message = "El rol es obligatorio")
     private Long roleId;
+
+    @NotBlank(message = "El tipo de emprendedor es obligatorio")
+    private String entrepeneurKind;
 }

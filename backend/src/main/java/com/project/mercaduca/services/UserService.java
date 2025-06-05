@@ -24,6 +24,7 @@ public class UserService {
         user.setMail(userUpdateDTO.getMail());
         user.setFaculty(userUpdateDTO.getFaculty());
         user.setMajor(userUpdateDTO.getMajor());
+        user.setEntrepeneurKind(userUpdateDTO.getEntrepeneurKind());
 
         userRepository.save(user);
     }
@@ -41,6 +42,7 @@ public class UserService {
         dto.setGender(user.getGender());
         dto.setFaculty(user.getFaculty());
         dto.setMajor(user.getMajor());
+        dto.setEntrepeneurKind(user.getEntrepeneurKind());
 
         return dto;
     }

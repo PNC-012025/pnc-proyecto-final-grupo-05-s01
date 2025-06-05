@@ -1,26 +1,20 @@
 package com.project.mercaduca.models;
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Table(name = "role")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
-
+public class Major {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    public Role(String admin) {
-        this.name = admin;
-    }
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    private Faculty faculty;
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class ContractService {
@@ -66,6 +67,11 @@ public class ContractService {
     public Contract createContract(Long userId, Double amount, String kindOfPayment, String paymentMethod, String paymentFrequency) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Optional<Contract> existingContract = contractRepository.findByUserId(userId);
+        if (existingContract.isPresent()) {
+            throw new IllegalStateException("El usuario ya tiene un contrato");
+        }
 
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusMonths(6);

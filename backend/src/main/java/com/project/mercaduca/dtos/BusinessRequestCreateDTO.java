@@ -55,4 +55,7 @@ public class BusinessRequestCreateDTO {
 
     @NotNull(message = "Carrera de usuario obligatoria")
     private String userMajor;
+
+    @NotNull(message = "Tipo de emprendedor obligatorio")
+    private String entrepeneurKind;
 }

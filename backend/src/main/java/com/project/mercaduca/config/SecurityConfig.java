@@ -47,9 +47,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/business-requests").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/business-requests/*/approve").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/business-requests/*/reject").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/business-requests").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/business-requests").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/business-requests/gender").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/business-requests/entrepeneurkind").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/business-requests/*/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/business-requests/*/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/business-requests").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/category").hasRole("ADMIN")
@@ -61,6 +64,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/business/*/approved").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/business-requests/approved-summary").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/major").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/major/*/majors").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/contract/create").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/contract/payment").hasRole("ADMIN")
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",

@@ -10,6 +10,6 @@ public class UserUpdateDTO {
     private String mail;
     private String faculty;
     private String major;
-
+    private String entrepeneurKind;
 
 }

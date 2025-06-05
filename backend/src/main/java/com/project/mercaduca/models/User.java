@@ -31,6 +31,7 @@ public class User implements UserDetails {
     private LocalDate birthDate;
     private String faculty;
     private String major;
+    private String entrepeneurKind;
 
     @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
     private Business business;

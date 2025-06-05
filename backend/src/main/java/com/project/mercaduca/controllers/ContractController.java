@@ -9,6 +9,7 @@ import com.project.mercaduca.models.Contract;
 import com.project.mercaduca.services.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -28,6 +29,7 @@ public class ContractController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createContract(@RequestBody ContractCreateDTO request) {
         Contract newContract = contractService.createContract(
                 request.getUserId(),
@@ -41,6 +43,7 @@ public class ContractController {
     }
 
     @PostMapping("/payment")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registrarPago(@RequestBody PaymentCreateDTO request) {
         try {
             contractService.registrarPago(

@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Contract> findAllByUserId(Long userId);
     Optional<Contract> findByUser(User user);
+    Optional<Contract> findByUserId(Long userId);
 
 }

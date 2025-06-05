@@ -63,6 +63,7 @@ public class BusinessRequestService {
         request.setUserBirthDate(dto.getUserBirthDate());
         request.setUserFaculty(dto.getUserFaculty());
         request.setUserMajor(dto.getUserMajor());
+        request.setEntrepeneurKind(dto.getEntrepeneurKind());
 
         request.setStatus("PENDIENTE");
         request.setSubmissionDate(LocalDate.now());
@@ -77,6 +78,8 @@ public class BusinessRequestService {
     public void approveRequest(Long requestId) {
         BusinessRequest request = businessRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        System.out.println("Solicitud encontrada: " + request.getId());
 
         if (!"PENDIENTE".equalsIgnoreCase(request.getStatus())) {
             throw new IllegalStateException("Esta solicitud ya fue procesada");
@@ -95,6 +98,7 @@ public class BusinessRequestService {
         user.setFaculty(request.getUserFaculty());
         user.setMajor(request.getUserMajor());
         user.setPassword(encodedPassword);
+        user.setEntrepeneurKind(request.getEntrepeneurKind());
         user.setRole(roleRepository.findByName("ROLE_EMPRENDEDOR").orElseThrow());
 
         userRepository.save(user);

@@ -39,11 +39,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 (method.equals("POST") && path.equals("/api/auth/login")) ||
                         (method.equals("POST") && path.equals("/api/auth/logout")) ||
                         (method.equals("POST") && path.equals("/api/business-requests")) ||
-                        (method.equals("GET") && path.equals("/api/business-requests")) ||
-                        (method.equals("POST") && path.matches("/api/business-requests/\\d+/approve")) ||
-                        (method.equals("GET") && path.matches("/api/products/business/\\d+/approved")) ||
+                        (method.equals("GET") && path.matches("/api/business-requests/gender")) ||
+                        (method.equals("GET") && path.matches("/api/business-requests/entrepeneurkind")) ||
                         (method.equals("GET") && path.matches("/api/business-requests/approved-summary")) ||
-                        (method.equals("GET") && path.equals("/api/products/"));
+                        (method.equals("GET") && path.matches("/api/major")) ||
+                        (method.equals("GET") && path.matches("/api/major/\\d+/majors"));
+
 
         if (isPublicPath) {
             filterChain.doFilter(request, response);

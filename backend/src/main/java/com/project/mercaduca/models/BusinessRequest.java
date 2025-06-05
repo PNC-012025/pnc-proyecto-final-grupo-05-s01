@@ -40,4 +40,5 @@ public class BusinessRequest {
     private LocalDate userBirthDate;
     private String userFaculty;
     private String userMajor;
+    private String entrepeneurKind;
 }
