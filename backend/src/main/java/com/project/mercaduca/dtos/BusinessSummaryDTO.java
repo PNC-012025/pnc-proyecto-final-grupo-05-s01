@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class BusinessSummaryDTO {
+    private Long id;
     private String businessName;
     private String urlLogo;
 }

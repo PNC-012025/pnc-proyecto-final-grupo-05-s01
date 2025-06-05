@@ -12,7 +12,8 @@ public class BusinessUpdateDTO {
     private String sector;
     private String productType;
     private String priceRange;
-    private String socialMedia;
+    private String facebook;
+    private String instagram;
     private String phone;
     private String urlLogo;
 }

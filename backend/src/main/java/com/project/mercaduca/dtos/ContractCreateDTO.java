@@ -8,12 +8,9 @@ import java.time.LocalDate;
 
 @Getter @Setter
 public class ContractCreateDTO {
-    @NotNull
-    private LocalDate startDate;
-
-    @NotNull
-    private LocalDate endDate;
-
-    @NotNull
     private Long userId;
+    private Double amount;
+    private String kindOfPayment;
+    private String paymentMethod;
+    private String paymentFrequency;
 }

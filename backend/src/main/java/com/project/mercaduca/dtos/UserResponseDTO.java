@@ -12,6 +12,6 @@ public class UserResponseDTO {
     private String gender;
     private String faculty;
     private String major;
-    private String roleName;
+    private String entrepeneurKind;
 
 }

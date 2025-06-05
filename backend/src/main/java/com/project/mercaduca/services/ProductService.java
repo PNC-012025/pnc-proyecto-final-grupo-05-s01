@@ -4,6 +4,7 @@ import com.project.mercaduca.dtos.BusinessWithProductsDTO;
 import com.project.mercaduca.dtos.ProductCreateDTO;
 import com.project.mercaduca.dtos.ProductPriceResponseDTO;
 import com.project.mercaduca.dtos.ProductResponseDTO;
+import com.project.mercaduca.exceptions.MaxProductsReachedException;
 import com.project.mercaduca.models.*;
 import com.project.mercaduca.repositories.*;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,9 @@ public class ProductService {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -83,6 +87,11 @@ public class ProductService {
         Business business = businessRepository.findByOwner(user)
                 .orElseThrow(() -> new RuntimeException("El usuario no tiene un negocio asociado"));
 
+        long productCount = productRepository.countByBusiness(business);
+        if (productCount >= 7) {
+            throw new MaxProductsReachedException("No se pueden crear más de 7 productos por usuario");
+        }
+
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
@@ -111,11 +120,14 @@ public class ProductService {
     }
 
 
+
     @Transactional
     public void reviewProduct(Long productId, boolean aprobado, String remarks) {
-        Product product = productRepository.findById(productId).orElseThrow();
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
         ProductApproval approval = productApprovalRepository.findByProduct(product)
-                .orElseThrow();
+                .orElseThrow(() -> new RuntimeException("Aprobación no encontrada"));
 
         approval.setStatus(aprobado ? "APROBADO" : "RECHAZADO");
         approval.setReviewDate(LocalDate.now());
@@ -124,6 +136,23 @@ public class ProductService {
 
         product.setStatus(approval.getStatus());
         productRepository.save(product);
+
+        User user = product.getBusiness().getOwner();
+
+        String htmlMessage = "<html>" +
+                "<body style='font-family: Arial, sans-serif;'>" +
+                "<h2>Resultado de validación de producto</h2>" +
+                "<p>Hola <strong>" + user.getName() + "</strong>,</p>" +
+                "<p>Tu producto <strong>" + product.getName() + "</strong> ha sido <strong>" + approval.getStatus().toLowerCase() + "</strong>.</p>" +
+                (remarks != null && !remarks.isBlank() ? "<p><strong>Observaciones:</strong> " + remarks + "</p>" : "") +
+                "<br><p>Saludos,<br>Equipo de Mercaduca</p>" +
+                "</body></html>";
+
+        emailService.sendHtml(
+                user.getMail(),
+                "Resultado de validación de tu producto",
+                htmlMessage
+        );
     }
 
     public List<ProductResponseDTO> getApprovedProducts() {
@@ -145,8 +174,9 @@ public class ProductService {
     }
 
 
-    public List<ProductResponseDTO> getPendingProducts() {
-        List<Product> products = productRepository.findByStatus("PENDIENTE");
+    public List<ProductResponseDTO> getPendingProducts(Long businessId) {
+        List<String> statuses = List.of("PENDIENTE", "RECHAZADO");
+        List<Product> products = productRepository.findByStatusInAndBusinessId(statuses, businessId);
 
         return products.stream()
                 .map(product -> new ProductResponseDTO(
@@ -215,7 +245,8 @@ public class ProductService {
                 business.getSector(),
                 business.getProductType(),
                 business.getPriceRange(),
-                business.getSocialMedia(),
+                business.getFacebook(),
+                business.getInstagram(),
                 business.getPhone(),
                 business.getUrlLogo(),
                 productDTOs
@@ -235,6 +266,7 @@ public class ProductService {
                 })
                 .orElse(null);
     }
+
 
 
 }

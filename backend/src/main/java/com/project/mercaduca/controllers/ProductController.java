@@ -1,15 +1,28 @@
 package com.project.mercaduca.controllers;
 
+import com.project.mercaduca.dtos.ProductApprovalRequestDTO;
 import com.project.mercaduca.dtos.ProductCreateDTO;
 import com.project.mercaduca.dtos.ProductReviewDTO;
+import com.project.mercaduca.models.Product;
+import com.project.mercaduca.models.ProductApproval;
+import com.project.mercaduca.models.User;
+import com.project.mercaduca.repositories.ProductApprovalRepository;
+import com.project.mercaduca.repositories.ProductRepository;
+import com.project.mercaduca.repositories.UserRepository;
 import com.project.mercaduca.services.CloudinaryService;
+import com.project.mercaduca.services.EmailService;
 import com.project.mercaduca.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,6 +33,18 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ProductApprovalRepository productApprovalRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     /*
     @PostMapping
@@ -97,8 +122,8 @@ public class ProductController {
 
     @GetMapping("/pending")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getPendingProducts() {
-        return ResponseEntity.ok(productService.getPendingProducts());
+    public ResponseEntity<?> getPendingProducts(@RequestParam Long businessId) {
+        return ResponseEntity.ok(productService.getPendingProducts(businessId));
     }
 
     @GetMapping("/business/{businessId}")
@@ -106,6 +131,64 @@ public class ProductController {
     public ResponseEntity<?> getProductsByBusiness(@PathVariable Long businessId) {
         return ResponseEntity.ok(productService.getProductsByBusiness(businessId));
     }
+
+    @PostMapping("/approve-batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> approveProductsBatch(@RequestBody ProductApprovalRequestDTO request) {
+        Set<Long> approvedIds = new HashSet<>(request.getApprovedProductIds());
+        Set<Long> rejectedIds = new HashSet<>(request.getRejectedProductIds());
+
+        Set<Long> intersection = new HashSet<>(approvedIds);
+        intersection.retainAll(rejectedIds);
+
+        if (!intersection.isEmpty()) {
+            return ResponseEntity.badRequest().body("Un producto no puede ser aprobado y rechazado al mismo tiempo. IDs conflictivos: " + intersection);
+        }
+
+        List<Product> approvedProducts = productRepository.findAllById(approvedIds);
+        List<Product> rejectedProducts = productRepository.findAllById(rejectedIds);
+
+        LocalDate now = LocalDate.now();
+
+        for (Product product : approvedProducts) {
+            product.setStatus("APROBADO");
+            ProductApproval approval = productApprovalRepository.findByProduct(product)
+                    .orElse(new ProductApproval());
+            approval.setProduct(product);
+            approval.setStatus("APROBADO");
+            approval.setReviewDate(now);
+            approval.setRemarks(request.getRemark());
+            productApprovalRepository.save(approval);
+        }
+
+        for (Product product : rejectedProducts) {
+            product.setStatus("RECHAZADO");
+            ProductApproval approval = productApprovalRepository.findByProduct(product)
+                    .orElse(new ProductApproval());
+            approval.setProduct(product);
+            approval.setStatus("RECHAZADO");
+            approval.setReviewDate(now);
+            approval.setRemarks(request.getRemark());
+            productApprovalRepository.save(approval);
+        }
+
+        productRepository.saveAll(approvedProducts);
+        productRepository.saveAll(rejectedProducts);
+
+
+        if (!approvedProducts.isEmpty()) {
+            User user = approvedProducts.get(0).getBusiness().getOwner();
+            emailService.sendProductApprovalSummaryEmail(user, approvedProducts, rejectedProducts, request.getRemark());
+        } else if (!rejectedProducts.isEmpty()) {
+            User user = rejectedProducts.get(0).getBusiness().getOwner();
+            emailService.sendProductApprovalSummaryEmail(user, approvedProducts, rejectedProducts, request.getRemark());
+        }
+
+        return ResponseEntity.ok("Productos procesados correctamente.");
+    }
+
+
+
 
 
 }

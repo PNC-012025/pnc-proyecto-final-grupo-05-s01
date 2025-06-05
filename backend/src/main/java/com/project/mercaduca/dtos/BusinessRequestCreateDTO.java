@@ -25,8 +25,9 @@ public class BusinessRequestCreateDTO {
     @NotNull(message = "Rango de precio obligatorio")
     private String priceRange;
 
-    @NotNull(message = "Redes sociales obligatorias")
-    private String socialMedia;
+    private String facebook;
+
+    private String instagram;
 
     @NotNull(message = "Telefono obligatorio")
     private String phone;
@@ -54,4 +55,7 @@ public class BusinessRequestCreateDTO {
 
     @NotNull(message = "Carrera de usuario obligatoria")
     private String userMajor;
+
+    @NotNull(message = "Tipo de emprendedor obligatorio")
+    private String entrepeneurKind;
 }

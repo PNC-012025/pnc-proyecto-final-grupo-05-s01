@@ -6,23 +6,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "category")
-@Getter @Setter
+import java.util.List;
+
+@Entity(name = "faculty")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
-
+public class Faculty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
-    private String description;
 
-
-    public Category(String ropa, String description) {
-        this.description = description;
-        this.name = ropa;
-    }
+    @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL)
+    private List<Major> majors;
 }

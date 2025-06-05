@@ -21,7 +21,8 @@ public class Payment {
     private LocalDate date;
     private Double amount;
     private String status;
-    private String remarks;
+    private String paymentMethod;
+    private String kindOfPayment;
 
     @ManyToOne
     @JoinColumn(name = "users_id")
