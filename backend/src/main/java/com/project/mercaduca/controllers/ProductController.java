@@ -187,8 +187,9 @@ public class ProductController {
         return ResponseEntity.ok("Productos procesados correctamente.");
     }
 
-
-
-
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOwnProduct(@PathVariable Long id) {
+        productService.deleteOwnProduct(id);
+        return ResponseEntity.ok("Producto marcado como eliminado.");
+    }
 }

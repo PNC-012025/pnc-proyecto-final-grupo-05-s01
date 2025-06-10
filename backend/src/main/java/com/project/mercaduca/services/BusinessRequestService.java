@@ -44,6 +44,19 @@ public class BusinessRequestService {
     }
 
     public BusinessRequest createBusinessRequest(BusinessRequestCreateDTO dto) {
+        if (userRepository.existsByMail(dto.getUserEmail())) {
+            throw new IllegalArgumentException("Ya existe un usuario registrado con este correo.");
+        }
+
+        boolean emailYaSolicitado = businessRequestRepository.existsByUserEmailAndStatusIn(
+                dto.getUserEmail(),
+                List.of("PENDIENTE", "APROBADO")
+        );
+
+        if (emailYaSolicitado) {
+            throw new IllegalArgumentException("Ya existe una solicitud activa con este correo.");
+        }
+
         BusinessRequest request = new BusinessRequest();
 
         request.setUrlLogo(dto.getUrlLogo());
@@ -70,6 +83,7 @@ public class BusinessRequestService {
 
         return businessRequestRepository.save(request);
     }
+
 
     public List<BusinessRequest> getAllBusinessRequests() {
         return businessRequestRepository.findAll();

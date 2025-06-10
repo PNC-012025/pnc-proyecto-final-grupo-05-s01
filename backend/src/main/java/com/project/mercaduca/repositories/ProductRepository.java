@@ -13,6 +13,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByBusiness(Business business);
     List<Product> findByStatusInAndBusinessId(List<String> statuses, Long businessId);
     long countByBusiness(Business business);
-
+    List<Product> findByBusinessAndStatusNot(Business business, String status);
+    long countByBusinessAndStatusNot(Business business, String status);
 
 }

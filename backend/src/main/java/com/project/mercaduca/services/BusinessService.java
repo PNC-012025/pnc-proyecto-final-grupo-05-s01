@@ -24,10 +24,6 @@ public class BusinessService {
         Business business = businessRepository.findByOwner(currentUser)
                 .orElseThrow(() -> new RuntimeException("No se encontró negocio del usuario"));
 
-        business.setBusinessName(dto.getBusinessName());
-        business.setDescription(dto.getDescription());
-        business.setSector(dto.getSector());
-        business.setProductType(dto.getProductType());
         business.setPriceRange(dto.getPriceRange());
         business.setFacebook(dto.getFacebook());
         business.setInstagram(dto.getInstagram());
