@@ -1,5 +1,11 @@
-FROM eclipse-temurin:17-jdk
+# Etapa 1: construir el jar
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
+# Etapa 2: imagen final
+FROM openjdk:17-jdk-slim
 VOLUME /tmp
-COPY target/mercaduca-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build /app/target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app.jar"]
