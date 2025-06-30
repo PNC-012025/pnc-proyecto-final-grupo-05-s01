@@ -13,12 +13,11 @@ Este sistema web busca digitalizar y optimizar la gestión del local, facilitand
 
 ---
 
-## Objetivos del sistema
+## Diagramas Entidad - Relación (Base de datos)
 
-- Solicitud de puestos para estudiantes emprendedores.
-- Gestión y renovación de contratos trimestrales.
-- Publicación de productos aprobados en un catálogo digital.
-- Visualización de talonario digital para seguimiento de pagos.
+![diagramabd n-capas](https://github.com/user-attachments/assets/6fe330c2-4d44-4a91-b9ef-0b39f7074781)
+
+![business](https://github.com/user-attachments/assets/2858c5ef-1978-4a58-8703-f5e06297fc92)
 
 ---
 
@@ -27,39 +26,23 @@ Este sistema web busca digitalizar y optimizar la gestión del local, facilitand
 | Capa         | Tecnología           |
 |--------------|----------------------|
 | Backend      | Spring Boot          |
-| Base de datos| PostgreSQL           |
+| Base de datos| PostgreSQL (DigitalOcean)          |
 | Deploy       | Heroku               |
 ---
 
-## Roles y funcionalidades
+## Instrucciones de compilación
 
-### Estudiante / Emprendedor
+> **Recomendación:** se sugiere utilizar **IntelliJ IDEA** como entorno de desarrollo para facilitar la ejecución del proyecto.
 
-- Enviar solicitud de puesto.
-- Ver estado de solicitud.
-- Subir productos para aprobación.
-- Ver contrato y fecha de vencimiento (solicitar renovación en caso de finalizado).
-- Consultar su talonario de pagos y estado de cuenta.
-- Mostrar su catálogo públicamente (solo lectura).
+### 1. Clonar el repositorio
+### 2. Abrir el proyecto en IntelliJ IDEA:
 
-### Administrador (COP)
+Selecciona la carpeta que contiene el archivo al abrir IntelliJ.
 
-- Aprobar o rechazar solicitudes.
-- Gestionar contratos y renovaciones.
-- Validar productos y fichas de stock.
-- Aprobar publicaciones del catálogo.
-- Actualizar estados de pago.
-- Ver estado de emprendimientos.
+Esperar a que se descarguen las dependencias automáticamente o hacer clic en el botón “Build” → “Build Project”
 
----
+### 3. Ejecutar el proyecto:
 
-## Recursos gestionados
+Una vez finalizada la descarga de dependencias y el build del proyecto, presionar el botón verde de **"Run"** que aparece en la parte superior de IntelliJ.
 
-- Solicitudes de puesto
-- Contratos
-- Talonario de pagos
-- Catálogo de productos
-- Fichas de stock
-- Usuarios (emprendedores y administradores)
-
----
+El backend se levantará por defecto en `http://localhost:8080`.
