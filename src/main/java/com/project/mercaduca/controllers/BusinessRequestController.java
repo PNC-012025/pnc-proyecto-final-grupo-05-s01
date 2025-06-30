@@ -1,9 +1,6 @@
 package com.project.mercaduca.controllers;
 
-import com.project.mercaduca.dtos.BusinessRequestCreateDTO;
-import com.project.mercaduca.dtos.BusinessRequestResponseDTO;
-import com.project.mercaduca.dtos.BusinessSummaryDTO;
-import com.project.mercaduca.dtos.RejectRequestDTO;
+import com.project.mercaduca.dtos.*;
 import com.project.mercaduca.enums.EntrepeneurKind;
 import com.project.mercaduca.enums.Gender;
 import com.project.mercaduca.models.BusinessRequest;
@@ -139,22 +136,23 @@ public class BusinessRequestController {
 
     @GetMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<BusinessRequest>> getBusinessRequests(
+    public ResponseEntity<Page<BusinessContractRequestDTO>> getBusinessRequests(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "desc") String sortDirection
     ) {
-        Page<BusinessRequest> requests = businessRequestService.getBusinessRequestsByStatusAndOrder(page, size, status, sortDirection);
+        Page<BusinessContractRequestDTO> requests = businessRequestService.getBusinessRequestsByStatusAndOrder(page, size, status, sortDirection);
         return ResponseEntity.ok(requests);
     }
 
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BusinessRequestResponseDTO> getRequestById(@PathVariable Long id) {
+    public ResponseEntity<BusinessContractRequestDTO> getRequestById(@PathVariable Long id) {
         BusinessRequest request = businessRequestService.getRequestById(id);
 
-        BusinessRequestResponseDTO dto = new BusinessRequestResponseDTO();
+        BusinessContractRequestDTO dto = new BusinessContractRequestDTO();
         dto.setId(request.getId());
         dto.setUrlLogo(request.getUrlLogo());
         dto.setBusinessName(request.getBusinessName());
@@ -172,8 +170,40 @@ public class BusinessRequestController {
         dto.setUserEmail(request.getUserEmail());
         dto.setEntrepeneurKind(request.getEntrepeneurKind());
         dto.setUserGender(request.getUserGender());
+        dto.setUserBirthDate(request.getUserBirthDate());
+
+        // Faculty
+        String facultyValue = request.getUserFaculty();
+        if (facultyValue != null) {
+            if (businessRequestService.isNumeric(facultyValue)) {
+                Long facultyId = Long.valueOf(facultyValue);
+                String facultyName = businessRequestService.getFacultyRepository()
+                        .findById(facultyId)
+                        .map(f -> f.getName())
+                        .orElse("Desconocida");
+                dto.setFacultyName(facultyName);
+            } else {
+                dto.setFacultyName(facultyValue);
+            }
+        }
+
+        // Major
+        String majorValue = request.getUserMajor();
+        if (majorValue != null) {
+            if (businessRequestService.isNumeric(majorValue)) {
+                Long majorId = Long.valueOf(majorValue);
+                String majorName = businessRequestService.getMajorRepository()
+                        .findById(majorId)
+                        .map(m -> m.getName())
+                        .orElse("Desconocida");
+                dto.setMajorName(majorName);
+            } else {
+                dto.setMajorName(majorValue);
+            }
+        }
 
         return ResponseEntity.ok(dto);
     }
+
 
 }

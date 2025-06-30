@@ -44,17 +44,18 @@ public class AuthController {
         //Cuando lo deployee en Vercel
         /*ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                 .httpOnly(true)
+                .secure(true)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .sameSite("None")
-                .secure(true)
-                .build();*/
+                .build();
+        */
         ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(24 * 60 * 60)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -67,8 +68,10 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
+                .secure(true)
                 .path("/")
                 .maxAge(0)
+                .sameSite("None")
                 .build();
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok(Map.of("message",  "Cierre de sesión exitoso"));
